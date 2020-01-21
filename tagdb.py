@@ -119,6 +119,12 @@ class db:
             pass
 
 
+    def dict_factory(self, cursor, row):
+        d = {}
+        for idx, col in enumerate(cursor.description):
+            d[col[0]] = row[idx]
+        return d
+
     def add_tag(self, tag, category=None):
         connection = sqlite3.connect(self.db_name)
         cursor= connection.cursor();
@@ -196,31 +202,30 @@ class db:
 
     def get_items_with_tags(self, tag_arr):
         connection = sqlite3.connect(self.db_name)
-        connection.row_factory = sqlite3.Row
+        connection.row_factory = self.dict_factory 
         cursor= connection.cursor()
         tag_amount = len(tag_arr)
         # Okay this is really bad.
         if tag_amount == 1:
-            cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=1", (tag_arr[0],))
+            db_result=cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=1", (tag_arr[0],))
         elif tag_amount == 2:
-            cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=2", (tag_arr[0],tag_arr[1]))
+            db_result=cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=2", (tag_arr[0],tag_arr[1]))
         elif tag_amount == 3:
-            cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=3", (tag_arr[0],tag_arr[1],tag_arr[2]))
+            db_result=cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=3", (tag_arr[0],tag_arr[1],tag_arr[2]))
         elif tag_amount == 4:
-            cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?, ?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=4", (tag_arr[0],tag_arr[1],tag_arr[2],tag_arr[3]))
+            db_result=cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?, ?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=4", (tag_arr[0],tag_arr[1],tag_arr[2],tag_arr[3]))
         elif tag_amount == 5:
-            cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?, ?, ?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=5", (tag_arr[0],tag_arr[1],tag_arr[2],tag_arr[3],tag_arr[4]))
+            db_result=cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?, ?, ?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=5", (tag_arr[0],tag_arr[1],tag_arr[2],tag_arr[3],tag_arr[4]))
         else:
             print('too many tags... only 5 supported because I\'m a bad dev.')
             return (-1, 'too many tags')
-        return cursor.fetchall()[0]
+        return db_result.fetchall() 
         '''
         SQL query:
         SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN ('two', 'one')) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=2
         
         Immediate implementation quirk - going to have to figure out how to do tag lookups correctly. It might have to be as basic as if tags.length = 1, =2, etc. which is a shame but if it works it works!
         '''
-
 
 
 
