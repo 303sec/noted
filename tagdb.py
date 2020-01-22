@@ -207,11 +207,12 @@ class db:
         tag_amount = len(tag_arr)
         # Okay this is really bad.
         if tag_amount == 1:
-            db_result=cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=1", (tag_arr[0],))
+	# Need to make the queries consistent
+            db_result=cursor.execute("SELECT title, details, notes, refs FROM info, tagmap, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=1", (tag_arr[0],))
         elif tag_amount == 2:
-            db_result=cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=2", (tag_arr[0],tag_arr[1]))
+            db_result=cursor.execute("SELECT  title, details, notes, refs FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=2", (tag_arr[0],tag_arr[1]))
         elif tag_amount == 3:
-            db_result=cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=3", (tag_arr[0],tag_arr[1],tag_arr[2]))
+            db_result=cursor.execute("SELECT title, details, notes, refs FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=3", (tag_arr[0],tag_arr[1],tag_arr[2]))
         elif tag_amount == 4:
             db_result=cursor.execute("SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?, ?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=4", (tag_arr[0],tag_arr[1],tag_arr[2],tag_arr[3]))
         elif tag_amount == 5:
