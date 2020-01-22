@@ -4,6 +4,76 @@ import sqlite3
 import os
 import time
 
+
+# http://howto.philippkeller.com/2005/04/24/Tags-Database-schemas/
+# 'Toxi' solution
+
+'''
+Intersection (AND)
+
+Query for bookmark+webservice+semweb
+
+SELECT b.*
+FROM tagmap bt, bookmark b, tag t
+WHERE bt.tag_id = t.tag_id
+AND (t.name IN ('bookmark', 'webservice', 'semweb'))
+AND b.id = bt.bookmark_id
+GROUP BY b.id
+HAVING COUNT( b.id )=3
+
+Union (OR)
+
+Query for bookmark|webservice|semweb
+
+SELECT b.*
+FROM tagmap bt, bookmark b, tag t
+WHERE bt.tag_id = t.tag_id
+AND (t.name IN ('bookmark', 'webservice', 'semweb'))
+AND b.id = bt.bookmark_id
+GROUP BY b.id
+
+'''
+
+
+'''
+CREATE TABLE info (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    details TEXT NOT NULL,
+    refs TEXT,
+    time_created DATE NOT NULL    
+    )
+CREATE TABLE tagmap (
+    id INTEGER PRIMARY KEY,
+    bookmark_id INTEGER,
+    tag_id INTEGER
+    )
+CREATE TABLE tags (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    category TEXT
+    )
+
+'''
+
+'''
+item dict input format:
+
+{
+    'title': '',
+    'details': '',
+    'category': '',
+    'references': [],
+    'notes': '',
+    'tags': [],
+}
+If the item is not included, it needs to be passed through as None.
+
+
+{'title': 'test_title', 'details': 'I am describing this test object.', 'category': 'technology', 'references':['http://google.com', 'https://anotherurl.com'], 'notes':None, 'tags':['one','two','thurmantastat']}
+
+'''
+
 class db:
     def __init__(self, base_dir):
         self.db_name = base_dir + '/tags.db'
@@ -151,7 +221,12 @@ class db:
             print('too many tags... only 5 supported because I\'m a bad dev.')
             return (-1, 'too many tags')
         return db_result.fetchall() 
-
+        '''
+        SQL query:
+        SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN ('two', 'one')) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=2
+        
+        Immediate implementation quirk - going to have to figure out how to do tag lookups correctly. It might have to be as basic as if tags.length = 1, =2, etc. which is a shame but if it works it works!
+        '''
 
 
 
@@ -179,7 +254,7 @@ functions to create:
 *[ ] get_similar_tags(tag_array)
     * return array of strings of similar tags
 
-*[x]get_items_with_tags()
+*[ ]get_items_with_tags()
     * return array of items with their full tag list
 
 '''
