@@ -17,17 +17,21 @@ def search(tags):
     """ Searches database for given tags """
     tag_list = []
     for tag in tags.split(','):
-    	tag_list.append(tag)
+        tag_list.append(tag)
     db = tagdb.db('./')
     items = db.get_items_with_tags(tag_list)
     if not items:
-    	click.echo('[-] No items found with those tags.')
-    	exit()
+        click.echo('[-] No items found with those tags.')
+        exit()
     for item in items:
-
-   		print(item)
-   		# print(AsciiTable(item).table)
-	   
+        heading_list = ['title', 'details', 'notes','references']
+        details_list = []
+        #print(item)
+        for detail in item:
+                details_list.append(detail)
+        printable_list = [heading_list, details_list]
+        print(AsciiTable(printable_list).table)
+           
 @cli.command()
 def delete_database():
     """ Deletes the current database. Just like that. """
@@ -40,9 +44,9 @@ def new_item():
     item_to_add = add_item_to_db.get_user_input()
     print(item_to_add)
     db.add_item(item_to_add)
-	   
+           
 
 
 if __name__ == '__main__':
-	cli()
+        cli()
 
