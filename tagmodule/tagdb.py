@@ -182,11 +182,18 @@ class db:
         for tag in tag_arr:
             tag = tag.lower()
             connection = sqlite3.connect(self.db_name)
-            connection.row_factory = sqlite3.Row
+            connection.row_factory = self.dict_factory
             cursor= connection.cursor();
             cursor.execute('SELECT id, name FROM tags WHERE name=?', (tag,))
             tag_arr_return = append([dict(row) for row in cursor.fetchall()])
         return tag_arr_return
+
+    def get_all_tags(self):
+        connection = sqlite3.connect(self.db_name)
+        connection.row_factory = self.dict_factory
+        cursor= connection.cursor();
+        cursor.execute('SELECT name FROM tags')
+        return cursor.fetchall()
 
     def does_tag_exist(self, tag):
         tag = tag.lower()
@@ -199,6 +206,20 @@ class db:
         else:
             return False
 
+    def get_item_titles(self):
+        connection = sqlite3.connect(self.db_name)
+        connection.row_factory = self.dict_factory
+        cursor= connection.cursor();
+        cursor.execute('SELECT id, title FROM info')
+        return cursor.fetchall()
+
+
+    def get_item_by_id(self, item_id):
+        connection = sqlite3.connect(self.db_name)
+        connection.row_factory = self.dict_factory
+        cursor= connection.cursor();
+        cursor.execute('SELECT title, details, notes, refs FROM info where id=?', (item_id,))
+        return cursor.fetchall()
 
     def get_items_with_tags(self, tag_arr):
         connection = sqlite3.connect(self.db_name)

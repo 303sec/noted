@@ -1,9 +1,13 @@
-# Testing Database Interaction 
+# Kaff Example!
 
 # Details:
-By killing a goat, all that is good in the world will die.
-You will not die.
-What does that say about you?
+*Technique*
+Send a request to the host with the header:
+* `Origin: https://303sec.com`
+* `Origin: null`
+* `Origin: *`
+
+If the response returns the origin parameter as it was sent, it could be possible to exfiltrate user information.
 
 # References:
 * https://google.com
@@ -12,7 +16,7 @@ What does that say about you?
 
 
 # Tags:
-testing,cool beans,delicious,beanlove,who am i
+webapp, HTTP header, CORS
 
 # Notes:
 
