@@ -1,4 +1,4 @@
- #!/usr/bin/python3
+#!/usr/bin/python3
 # add-tag script
 
 import os
@@ -26,6 +26,7 @@ class add_item:
 
 
 	def get_user_input(self):
+		print('getuserinput')
 		template_file = 'tag_template.md'
 		template_file_temp = '/tmp/tag_template.md.tmp'
 		# output_dir = '/mnt/google_drive/Methodology/'
