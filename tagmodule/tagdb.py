@@ -79,22 +79,23 @@ class db:
         cursor = connection.cursor()
         for tag in item_dict['tags']:
             tag = tag.lower()
-            if not self.does_tag_exist(tag):
+            if not self.does_tag_exist(tag) and tag.strip() != '':
                 # New tag - let's create it!
                 print('[+] Creating new tag:', tag)
-                cursor.execute('INSERT INTO tags (name) VALUES (?)',(tag,))
+                cursor.execute('INSERT INTO tags (name) VALUES (?)',(tag.strip().lower(),))
                 connection.commit() 
         ts = int(time.time())
         # Check that the minimum requirements of title and details are included
-        cursor.execute('INSERT INTO info (title, details, category, refs, file, time_created) VALUES (?, ?, ?, ?, ?, ?)',(item_dict['title'], item_dict['details'], item_dict['category'],''.join(item_dict['refs']), item_dict['savefile'], ts))
+        cursor.execute('INSERT INTO info (title, details, category, refs, file, time_created) VALUES (?, ?, ?, ?, ?, ?)',(item_dict['title'].strip(), item_dict['details'].strip(), item_dict['category'].strip().lower(),','.join(item_dict['refs']), item_dict['savefile'], ts))
         item_id = cursor.lastrowid
         connection.commit()
         for tag in item_dict['tags']:
-            tag = tag.lower()
-            cursor.execute('SELECT id FROM tags where name = ?', (tag,))
-            tag_id = cursor.fetchone()[0]
-            cursor.execute('INSERT INTO tagmap (item_id, tag_id) VALUES (?, ?)', (item_id, tag_id))
-            connection.commit()
+            if tag != '':
+                tag = tag.lower()
+                cursor.execute('SELECT id FROM tags where name = ?', (tag.strip().lower(),))
+                tag_id = cursor.fetchone()[0]
+                cursor.execute('INSERT INTO tagmap (item_id, tag_id) VALUES (?, ?)', (item_id, tag_id))
+                connection.commit()
         connection.close()
 
     # Assumes there's only one tag with that name - there should never be duplicates.
@@ -136,6 +137,16 @@ class db:
         else:
             return False
 
+    def does_file_exist(self, file):
+        connection = sqlite3.connect(self.db_name)
+        connection.row_factory = sqlite3.Row
+        cursor= connection.cursor();
+        cursor.execute('SELECT * FROM info WHERE file=?', (file,))
+        if cursor.fetchall():
+            return True
+        else:
+            return False
+
     def get_item_titles(self):
         connection = sqlite3.connect(self.db_name)
         connection.row_factory = self.dict_factory
@@ -156,28 +167,19 @@ class db:
         connection.row_factory = self.dict_factory 
         cursor= connection.cursor()
         tag_amount = len(tag_arr)
-        # Okay this is really bad.
+        # Better than before, at least. Now creates (?,?) dependent on amount of tags given, which is concatented with the SQL query.
         if tag_amount == 1:
-	    # Need to make the queries consistent
-            db_result=cursor.execute("SELECT title, details, notes, refs FROM info, tagmap, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=1", (tag_arr[0],))
-        elif tag_amount == 2:
-            db_result=cursor.execute("SELECT title, details, notes, refs FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=2", (tag_arr[0],tag_arr[1]))
-        elif tag_amount == 3:
-            db_result=cursor.execute("SELECT title, details, notes, refs FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=3", (tag_arr[0],tag_arr[1],tag_arr[2]))
-        elif tag_amount == 4:
-            db_result=cursor.execute("SELECT title, details, notes, refs FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?, ?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=4", (tag_arr[0],tag_arr[1],tag_arr[2],tag_arr[3]))
-        elif tag_amount == 5:
-            db_result=cursor.execute("SELECT title, details, notes, refs FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?, ?, ?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=5", (tag_arr[0],tag_arr[1],tag_arr[2],tag_arr[3],tag_arr[4]))
+            tag_name_query_in = '(?)'
         else:
-            print('too many tags... only 5 supported because I\'m a bad dev.')
-            return (-1, 'too many tags')
+            tag_name_query_in = '('
+            for tag in range(tag_amount):
+                tag_name_query_in = tag_name_query_in + '?,'
+            tag_name_query_in = tag_name_query_in[:-1] + ')'
+
+        sql_query = "SELECT title, info.category, file FROM info, tagmap, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN" + tag_name_query_in + ") AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=" + str(tag_amount)
+        db_result=cursor.execute(sql_query, tag_arr)        
         return db_result.fetchall() 
-        '''
-        SQL query:
-        SELECT * FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN ('two', 'one')) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=2
-        
-        Immediate implementation quirk - going to have to figure out how to do tag lookups correctly. It might have to be as basic as if tags.length = 1, =2, etc. which is a shame but if it works it works!
-        '''
+
 
 
 

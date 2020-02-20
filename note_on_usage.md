@@ -17,6 +17,7 @@
 ### Future features
 * Ability to edit items
 	* Just as simple as putting in the name/ID of the item, opening the saved markdown file which was originally used, and then re-parsing that into the database (deleting original entry). Shouldn't actually be that difficult to implement.
+	* Need to add a hash to the info table which can be checked against the files when using parse_dir 
 * Web interface - a Markdown->HTML generator run against the methodology directory, and a page that shows all the titles for tags that have been searched for
 * __Methodology/checklist builder__: Get each of the items from the database that have the relevant tags and create a markdown checklist. 
 	* This is most effective if the tag system is working on a system-by-system basis - that is, we create tags for different pieces of software and versions of that software
