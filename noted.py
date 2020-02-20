@@ -4,6 +4,8 @@ import click
 from terminaltables import AsciiTable
 from tagmodule import tagdb, new_item
 import os
+import shutil
+import time
 import glob
 
 # Utility to get the correct notes dir from a config file. This can be improved to support a proper config file!
@@ -53,9 +55,22 @@ def search(tags, output):
     db = tagdb.db(notes_dir)
     items = db.get_items_with_tags(tags)
     if not items:
-        click.echo('[-] No items found with those tags.')
+        click.echo('[-] No matching items.')
         exit()
-
+    if output:
+        outdir = output + '/noted_out-' + '+'.join(tags)
+        if os.path.exists(outdir):
+            print('[-] Outdir already exists. Delete', outdir, 'and try again. Exiting.')
+            exit()
+        print('[+] Found', len(items), 'matches. Creating output directory.')
+        os.makedirs(outdir)
+        for item in items:
+            filename = item['file'].split('/')[-1]
+            outfile = outdir + '/' + filename
+            print('[+] Creating symlink for', filename)
+            os.symlink(item['file'], outfile)
+        print('[+] Search complete.')
+        exit()
     all_items = [['title', 'category', 'file']]
     for item in items:
         details_list = []
