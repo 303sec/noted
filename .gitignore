@@ -1,0 +1,11 @@
+# gitignore
+
+__pycache__
+*/__pycache__
+*.swp
+venv/*
+*.egg-info
+deploy
+.DS_Store
+*/.DS_Store
+*.pyc
