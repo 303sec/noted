@@ -28,8 +28,8 @@ notes_dir = get_notes_dir_from_config(config_file)
 def category_options(ctx, args, incomplete):
     category_list = []
     for category_dir in os.walk(notes_dir):
-        if category_dir.strip('/') != 'tmp':
-        category_list.append(category_dir[0].replace(notes_dir, '').strip('/'))
+        if category_dir[0].strip('/') != 'tmp':
+            category_list.append(category_dir[0].replace(notes_dir, '').strip('/'))
     return [k for k in category_list if incomplete in k]
 
 # Tag Notes Database CLI Options etc.
@@ -61,7 +61,8 @@ def search(tags):
 @cli.command()
 def delete_database():
     """ Deletes the current database. Just like that. """
-    os.remove(notes_dir + '/notes.db')
+    os.remove(notes_dir + '/noted.db')
+    print('Database deleted.')
 
 @cli.command()
 @click.option('-i', '--id', help='ID of the item to read.', required=True)
@@ -108,10 +109,10 @@ def view_tags():
 @click.option('-t', '--tags', required=False, help='Comma delimited list of tags to add.')
 def add_item(category, title, tags):
     """ Add a new item to the methodology """
+    passthrough_dict = {'category': category, 'title': title, 'tags': tags}
     db = tagdb.db(notes_dir)
-    add_item_to_db = new_item.new_item(notes_dir)
+    add_item_to_db = new_item.new_item(passthrough_dict, notes_dir)
     item_to_add = add_item_to_db.get_user_input()
-    print(item_to_add)
     db.add_item(item_to_add)
            
 

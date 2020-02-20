@@ -4,79 +4,9 @@ import sqlite3
 import os
 import time
 
-
-# http://howto.philippkeller.com/2005/04/24/Tags-Database-schemas/
-# 'Toxi' solution
-
-'''
-Intersection (AND)
-
-Query for bookmark+webservice+semweb
-
-SELECT b.*
-FROM tagmap bt, bookmark b, tag t
-WHERE bt.tag_id = t.tag_id
-AND (t.name IN ('bookmark', 'webservice', 'semweb'))
-AND b.id = bt.bookmark_id
-GROUP BY b.id
-HAVING COUNT( b.id )=3
-
-Union (OR)
-
-Query for bookmark|webservice|semweb
-
-SELECT b.*
-FROM tagmap bt, bookmark b, tag t
-WHERE bt.tag_id = t.tag_id
-AND (t.name IN ('bookmark', 'webservice', 'semweb'))
-AND b.id = bt.bookmark_id
-GROUP BY b.id
-
-'''
-
-
-'''
-CREATE TABLE info (
-    id INTEGER PRIMARY KEY,
-    title TEXT NOT NULL,
-    details TEXT NOT NULL,
-    refs TEXT,
-    time_created DATE NOT NULL    
-    )
-CREATE TABLE tagmap (
-    id INTEGER PRIMARY KEY,
-    bookmark_id INTEGER,
-    tag_id INTEGER
-    )
-CREATE TABLE tags (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    category TEXT
-    )
-
-'''
-
-'''
-item dict input format:
-
-{
-    'title': '',
-    'details': '',
-    'category': '',
-    'references': [],
-    'notes': '',
-    'tags': [],
-}
-If the item is not included, it needs to be passed through as None.
-
-
-{'title': 'test_title', 'details': 'I am describing this test object.', 'category': 'technology', 'references':['http://google.com', 'https://anotherurl.com'], 'notes':None, 'tags':['one','two','thurmantastat']}
-
-'''
-
 class db:
     def __init__(self, base_dir):
-        self.db_name = base_dir + '/tags.db'
+        self.db_name = base_dir + 'noted.db'
         
         if not os.path.exists(self.db_name):
             print('[+] Creating database at', self.db_name)
@@ -89,6 +19,7 @@ class db:
                 id INTEGER PRIMARY KEY,
                 title TEXT NOT NULL,
                 details TEXT NOT NULL,
+                category TEXT NOT NULL,
                 refs TEXT,
                 notes TEXT,
                 file TEXT,
@@ -146,7 +77,6 @@ class db:
             return (-1, 'Title and Details required in item_dict') 
         connection = sqlite3.connect(self.db_name)
         cursor = connection.cursor()
-
         for tag in item_dict['tags']:
             tag = tag.lower()
             if not self.does_tag_exist(tag):
@@ -156,7 +86,7 @@ class db:
                 connection.commit() 
         ts = int(time.time())
         # Check that the minimum requirements of title and details are included
-        cursor.execute('INSERT INTO info (title, details, refs, time_created) VALUES (?, ?, ?, ?)',(item_dict['title'], item_dict['details'], ','.join(item_dict['refs']), ts))
+        cursor.execute('INSERT INTO info (title, details, category, refs, file, time_created) VALUES (?, ?, ?, ?, ?, ?)',(item_dict['title'], item_dict['details'], item_dict['category'],''.join(item_dict['refs']), item_dict['savefile'], ts))
         item_id = cursor.lastrowid
         connection.commit()
         for tag in item_dict['tags']:
@@ -228,7 +158,7 @@ class db:
         tag_amount = len(tag_arr)
         # Okay this is really bad.
         if tag_amount == 1:
-	# Need to make the queries consistent
+	    # Need to make the queries consistent
             db_result=cursor.execute("SELECT title, details, notes, refs FROM info, tagmap, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=1", (tag_arr[0],))
         elif tag_amount == 2:
             db_result=cursor.execute("SELECT title, details, notes, refs FROM tagmap, info, tags WHERE tagmap.tag_id = tags.id AND (tags.name IN (?, ?)) AND info.id = tagmap.item_id GROUP BY info.id HAVING COUNT( info.id )=2", (tag_arr[0],tag_arr[1]))

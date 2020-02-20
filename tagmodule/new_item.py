@@ -4,11 +4,11 @@
 import os
 import argparse
 import shutil
+import time
 
 class new_item:
-	def __init__(self, category=None, outpath=None):
-		if category != None:
-			self.category = category
+	def __init__(self, passthru_dict, outpath=None):
+		self.cli_args = passthru_dict
 		if outpath == None:
 			self.outpath = os.path.expanduser('~/notes')
 		else:
@@ -31,48 +31,78 @@ class new_item:
 
 
 	def get_user_input(self):
-		print('getuserinput')
-		template_file = self.outpath + '/tag_template.md'
-		template_file_temp = self.outpath + '/tmp/tag_template.md.tmp'
-		# output_dir = '/mnt/google_drive/Methodology/'
+		ts = str(int(time.time()))
+		template_file_temp = self.outpath + '/tmp/' + ts + '.md.tmp'
 		output_dir = self.outpath
-		shutil.copyfile(template_file, template_file_temp)
+		template = f'''# Item Title
 
-		os.system('vim ' + template_file)
+## Details:
+<DETAILS>
 
-		output_dict = {}
+### PoC:
 
-		f = open(template_file, 'r')
+###Payload: 
 
-		# Get the category and the title from the file
-		x = f.readlines()
-		title = x[0].strip('#').strip()
-		title_file = title.replace(' ', '_') + '.md'
-		print(title_file)
-		if title_file == 'Item_Title.md':
-			print('Failed. Idea Title not changed.')
-			exit()
+# References:
+* [ref](url)
 
-		if self.category == None:
-			category = self.get_data_between_lines(x, "# Category:", "# Tags:")
+## Category:
+<CATEGORY>
+
+## Tags:
+<TAGS>
+
+<eof>
+		'''
+		if self.cli_args['category']:
+			template = template.replace('<CATEGORY>', self.cli_args['category'])
+		if self.cli_args['title']:
+			template = template.replace('Item Title', self.cli_args['title'])
+		if self.cli_args['tags']:
+			template = template.replace('<TAGS>', self.cli_args['tags'])
+
+		with open(template_file_temp, 'w+') as template_file_gen:
+			template_file_gen.write(template)
+			template_file_gen.close()
+
+		os.system('vim ' + template_file_temp)
+
+
+		# Open the temp_template and get the title from the file
+		with open(template_file_temp, 'r+') as template_file_read:
+			x = template_file_read.readlines()
+			if x == template:
+				print('Failed. No changes.')
+				exit()
+			title = x[0].strip('#').strip()
+			title_file = title.replace(' ', '_') + '.md'
+			if title_file == 'Item_Title.md':
+				title_file = 'Unnamed_' + ts + '.md'
+				print('Warning! Idea Title not changed. Saving as', title_file)
+
+			# Get the Category from the file
+			category = self.get_data_between_lines(x, "## Category:", "## Tags:")
 			if category == '':
 				category = 'uncategorised'
 			# Remove leading or ending slashes for consistency
 			category = category.strip('/')
 
-		category_dir = self.outpath + '/' + category
-		os.mkdirs(category_dir)
-		outfile = category_dir + '/' + title_file
-		shutil.move(template_file_temp, outfile)
+			category_dir = self.outpath + '/' + category
+			if not os.path.exists(category_dir):
+				print('Category directory does not exist. Creating', category_dir)
+				os.makedirs(category_dir)
+			outfile = category_dir + '/' + title_file
+			shutil.move(template_file_temp, outfile)
 
-
-
+		# To return and put in the database
+		output_dict = {}
 		output_dict['title'] = x[0].strip('#').strip()
-		output_dict['details'] = self.get_data_between_lines(x, "# Details:", "# References:")
-		output_dict['refs'] = [i.strip('*').strip() for i in self.get_data_between_lines(x, "# References:", "# Category:").split('\n')]
-		output_dict['category'] = self.get_data_between_lines(x, "# Category:", "# Tags:")
-		output_dict['tags'] = [i for i in self.get_data_between_lines(x, "# Tags:", "# Notes:").split(',')]
-		output_dict['notes'] = self.get_data_between_lines(x, "# Notes:", "<eof>")
+		output_dict['details'] = self.get_data_between_lines(x, "## Details:", "## References:")
+		output_dict['refs'] = [i.strip('*').strip() for i in self.get_data_between_lines(x, "# References:", "## Category:").split('\n')]
+		output_dict['category'] = self.get_data_between_lines(x, "## Category:", "## Tags:")
+		output_dict['tags'] = [i for i in self.get_data_between_lines(x, "# Tags:", "## Notes:").split(',')]
+		output_dict['notes'] = self.get_data_between_lines(x, "## Notes:", "<eof>")
+		output_dict['savefile'] = outfile
 
 		return output_dict
 
