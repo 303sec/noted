@@ -10,11 +10,11 @@ import glob
 
 # Utility to get the correct notes dir from a config file. This can be improved to support a proper config file!
 def get_notes_dir_from_config(config_file=None):
-    if not os.path.exists(config_file):
+    if not os.path.exists(os.path.expanduser(config_file)):
         print('[-] No config file found. Please make a noted.conf file in your home directory.')
         exit()
         # Todo - auto generate config file on first run.
-    if os.path.exists(config_file) and config_file:
+    if os.path.exists(os.path.expanduser(config_file)) and config_file:
         with open(os.path.expanduser(config_file), 'r') as config:
             config_lines = config.readlines()
             for line in config_lines:
