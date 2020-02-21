@@ -52,13 +52,14 @@ class new_item:
 	def parse_template(self, template_file_temp):
 		# Open the temp_template and get the title from the file
 		with open(template_file_temp, 'r+') as template_file_read:
-			x = template_file_read.readlines()
-			if x == self.template:
+			x = template_file_read.read().strip()
+			if x == self.template.strip():
 				print('Failed. No changes.')
 				exit()
 			title = x[0].strip('#').strip()
 			title_file = title.replace(' ', '_') + '.md'
 			if title_file == 'Item_Title.md':
+				ts = str(int(time.time()))
 				title_file = 'Unnamed_' + ts + '.md'
 				print('Warning! Idea Title not changed from default. Saving as', title_file)
 
