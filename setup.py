@@ -9,7 +9,6 @@ setup(
     install_requires=[
         'Click',
         'terminaltables',
-        'click_completion'
     ],
     entry_points='''
         [console_scripts]
