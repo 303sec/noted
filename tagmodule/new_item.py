@@ -13,7 +13,7 @@ class new_item:
 			self.outpath = os.path.expanduser('~/notes/')
 		else:
 			self.outpath = os.path.expanduser(outpath)
-		self.template = f'''# Item Title
+		self.template = '''# Item Title
 
 ## Details:
 <DETAILS>

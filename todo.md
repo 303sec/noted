@@ -17,4 +17,4 @@ __Output Stuff__
 	* [x] Test the bug is fixed
 * [x] Fix the terrible tag input search
 * [x] Search without output = list titles with categories, tags and filenames
-* [ ] Create outputs for tag scans - folder with symlinks to all the relevant files 
+* [x] Create outputs for tag scans - folder with symlinks to all the relevant files 

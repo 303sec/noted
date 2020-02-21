@@ -10,7 +10,11 @@ import glob
 
 # Utility to get the correct notes dir from a config file. This can be improved to support a proper config file!
 def get_notes_dir_from_config(config_file=None):
-    if config_file:
+    if not os.path.exists(config_file):
+        print('[-] No config file found. Please make a noted.conf file in your home directory.')
+        exit()
+        # Todo - auto generate config file on first run.
+    if os.path.exists(config_file) and config_file:
         with open(os.path.expanduser(config_file), 'r') as config:
             config_lines = config.readlines()
             for line in config_lines:
@@ -23,7 +27,7 @@ def get_notes_dir_from_config(config_file=None):
     return basedir
 
 
-config_file = '~/tagdb.conf'
+config_file = '~/noted.conf'
 notes_dir = get_notes_dir_from_config(config_file)
 
 # Get the categories for Click's tab completion with the new item option. Ignore the tmp dir.
