@@ -7,6 +7,7 @@ import os
 import shutil
 import time
 import glob
+import itertools
 
 # Utility to get the correct notes dir from a config file. This can be improved to support a proper config file!
 def get_notes_dir_from_config(config_file=None):
@@ -137,11 +138,18 @@ def view_items(ids):
     db = tagdb.db(notes_dir)
     print(db.get_item_titles())
 
+
 @cli.command()
 def view_tags():
     """ View all tags currently in the database. """
     db = tagdb.db(notes_dir)
-    print(db.get_all_tags())
+    all_tags = [ x['name'] for x in db.get_all_tags() ]
+    alphabet_sorted_tags = sorted(all_tags)
+    # Breaking this down: itertools.groupby()
+    tags_in_lists = [alphabet_sorted_tags[i:i+3] for i in range(0, len(alphabet_sorted_tags), 3)]
+    table = AsciiTable(tags_in_lists)
+    table.inner_heading_row_border = False
+    print(table.table)
 
 
 @cli.command()
