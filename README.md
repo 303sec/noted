@@ -30,9 +30,10 @@ There will be a variety of formats for noted documents, that correspond to the f
 * resource
 * wordlist
 * poc
-* tool_usage
+* tool\_usage
 * technique
 * methodology
+* quick\_tips
 
 These formats can either have specific templates or just reference the type of data stored in the file, in a specific sub-section.
 
@@ -61,3 +62,7 @@ A methodology item. Essentially part of the root category's methodology, so with
 #### PoC
 
 Proof-of-concept: contains a code block with a proof of concept exploit.
+
+#### Quick Tips
+
+What is says on the tin: Just a quick one-liner or tip to remember a thing.
