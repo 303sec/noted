@@ -13,14 +13,10 @@ class new_item:
             self.outpath = os.path.expanduser('~/notes/')
         else:
             self.outpath = os.path.expanduser(outpath)
-        self.template = '''# Item Title
+        self.original_template = self.template = '''# Item Title
 
 ## Details:
 <DETAILS>
-
-### PoC:
-
-###Payload: 
 
 ## References:
 * [ref](url)
@@ -56,7 +52,7 @@ class new_item:
             x = template_file_read.readlines()
             template_file_read.seek(0)
             
-            if template_file_read.read().strip() == self.template.strip():
+            if template_file_read.read().strip() == self.original_template.strip():
                 print('Failed. No changes.')
                 exit()
             title = x[0].strip('#').strip()
@@ -106,6 +102,10 @@ class new_item:
             self.template = self.template.replace('Item Title', self.cli_args['title'])
         if self.cli_args['tags']:
             self.template = self.template.replace('<TAGS>', self.cli_args['tags'])
+        if self.cli_args['resources']:
+            self.template = self.template.replace('* [ref](url)', self.cli_args['resources'])
+        if self.cli_args['details']:
+            self.template = self.template.replace('<DETAILS>', self.cli_args['details'])
 
         with open(template_file_temp, 'w+') as template_file_gen:
             template_file_gen.write(self.template)
@@ -121,13 +121,4 @@ class new_item:
         print(output_dict)
         return output_dict
 
-# We need to hook this up to the SQLite database and then we're good!
-# Also worth outputting the file into the methodology directory, maybe with the category as a folder.
-
-
-# output_file = output_dir + title_file
-
-# shutil.move(template_file_temp, output_file)
-
-# print('Success! Wrote file: ' + title_file + ' to Ideas/Unsorted')
 

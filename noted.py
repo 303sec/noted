@@ -165,4 +165,18 @@ def add_item(category, title, tags):
     db.add_item(item_to_add)
            
 
-
+@cli.command()
+@click.option('-c', '--category', type=click.STRING, autocompletion=category_options, required=False, help='Category to add the item to.')
+@click.option('-T', '--title', required=False, help='Title of the note.')
+@click.option('-t', '--tags', required=False, help='Comma delimited list of tags to add.')
+@click.option('-r', '--resources', required=False, help='Resource URL to add. Either in Markdown format or raw URL.', multiple=True)
+def add_resource(category, title, tags, resources):
+    """ Add a new resource to the methodology """
+    resources_prepended = ['* {0}'.format(x) for x in resources]
+    formatted_resources = '\n'.join(resources_prepended)
+    tags = 'resource,' + tags
+    passthrough_dict = {'category': category, 'title': title, 'tags': tags, 'resources': formatted_resources, 'details': 'n/a'}
+    db = tagdb.db(notes_dir)
+    add_item_to_db = new_item.new_item(passthrough_dict, notes_dir)
+    item_to_add = add_item_to_db.get_user_input()
+    db.add_item(item_to_add)
