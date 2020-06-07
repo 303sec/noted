@@ -71,7 +71,7 @@ class new_item:
 
             category_dir = self.outpath + category
             if not os.path.exists(category_dir):
-                print('Category directory does not exist. Creating', category_dir)
+                print('Note type directory does not exist. Creating', category_dir)
                 os.makedirs(category_dir)
             outfile = category_dir + '/' + title_file
             shutil.move(template_file_temp, outfile)
@@ -91,7 +91,10 @@ class new_item:
 
     def get_user_input(self):
         ts = str(int(time.time()))
-        template_file_temp = self.outpath + '/tmp/' + ts + '.md.tmp'
+        temp_dir = self.outpath + '/tmp/'
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir)
+        template_file_temp = temp_dir + ts + '.md.tmp'
         output_dir = self.outpath
         
         if self.cli_args['category']:

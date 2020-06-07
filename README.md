@@ -12,6 +12,10 @@ pip install -r requirements.txt
 
 ## Usage
 
+### Add Item
+
+This adds an item to the methodology directory.
+
 `noted add-item`
 
 Opens the text editor specified by the $EDITOR environment variable (default: vim), with the template to add an item to the configured note directory.
@@ -21,11 +25,21 @@ Saving the file creates a markdown file with the title of the issue in the given
 
 Opens the text editor (as above), which will open with pre-populated title, tags and category.
 
+### Add Idea
+
+Adds an idea to the idea dir. Identical to add item except with the directory.
+
+`noted add-idea`
+
+### Add Bug Report
+
+Adds a new bug report, exactly like add-item. 
+
+`noted add-bugreport`
+
 ## Tag Guide
 
-### Formats
-
-There will be a variety of formats for noted documents, that correspond to the following tags:
+There will be a variety of tags that define documents in Noted, a definitive list of these tags is as follows:
 
 * resource
 * wordlist
@@ -35,12 +49,12 @@ There will be a variety of formats for noted documents, that correspond to the f
 * methodology
 * quick\_tips
 
-These formats can either have specific templates or just reference the type of data stored in the file, in a specific sub-section.
+These formats reference the type of data stored in the file, and the following breakdown can give more insight into what to add .
 
 
 #### Resource
 
-A title, single URL and description. 
+A title & URL (or collection of URLS). No need for a description. 
 
 #### Payload
 
