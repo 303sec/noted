@@ -55,8 +55,10 @@ def cli():
 @cli.command()
 @click.option('-t', '--tags', multiple=True, type=click.STRING, autocompletion=tag_options, help='Search for items with tags.', )
 @click.option('-o', '--output', help='output path for directory to be created')
-def search(tags, output):
+@click.option('-f', '--form', help='Type of resource to access', default='Methodology', required=False)
+def search(tags, output, form):
     """ Searches database for given tags """
+    notes_dir = base_dir + form + '/'
     db = tagdb.db(notes_dir)
     items = db.get_items_with_tags(tags)
     if not items:
