@@ -40,4 +40,4 @@ __Features__
 * [ ] BUG - the directory is stored from the machine being used, which makes no sense with the share.
 	* search should also give the tags of the item
 	* 
-* [ ] Allow for 'resources' to be added with add-resource
+* [x] Allow for 'resources' to be added with add-resource
